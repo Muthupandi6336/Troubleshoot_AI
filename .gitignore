@@ -17,6 +17,7 @@ ENV/
 # Django
 local_settings.py
 *.log
+staticfiles/
 
 # IDE & OS
 .vscode/

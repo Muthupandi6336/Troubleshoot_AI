@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: troubleshoot-ai
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn troubleshoot_ai.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
