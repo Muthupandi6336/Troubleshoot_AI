@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Troubleshoot AI - Chat{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <div class="chat-header">
+        <div class="chat-title">
+            <i class="fas fa-robot text-gradient"></i> Support Assistant
+            <div class="ai-status-indicator"></div>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="clear-chat-btn">
+            <i class="fas fa-trash"></i> Clear Chat
+        </button>
+    </div>
+
+    <div class="chat-messages" id="chat-messages">
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="message {% if msg.role == 'user' %}message-user{% else %}message-assistant{% endif %}">
+                    <div class="message-avatar">
+                        {% if msg.role == 'user' %}<i class="fas fa-user"></i>{% else %}<i class="fas fa-robot"></i>{% endif %}
+                    </div>
+                    <div class="message-content">
+                        {{ msg.content|safe }}
+                        {% if msg.role == 'assistant' and msg.confidence %}
+                            <div class="message-confidence">
+                                <i class="fas fa-check-circle"></i> Confidence: {{ msg.confidence }}%
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="message message-assistant" id="welcome-message">
+                <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                <div class="message-content">
+                    Hello! I'm your AI IT Support Assistant. How can I help you today?
+                    
+                    <div class="mt-4 text-sm text-muted">Suggested queries:</div>
+                    <div class="flex flex-col gap-2 mt-2">
+                        <button class="btn btn-secondary btn-sm text-left w-full" onclick="setInput('My WiFi keeps disconnecting')">My WiFi keeps disconnecting</button>
+                        <button class="btn btn-secondary btn-sm text-left w-full" onclick="setInput('Forgot my password, account locked')">Forgot my password, account locked</button>
+                        <button class="btn btn-secondary btn-sm text-left w-full" onclick="setInput('Outlook crashes when opening attachments')">Outlook crashes when opening attachments</button>
+                        <button class="btn btn-secondary btn-sm text-left w-full" onclick="setInput('My computer is extremely slow')">My computer is extremely slow</button>
+                        <button class="btn btn-secondary btn-sm text-left w-full" onclick="setInput('VPN connection drops every few minutes')">VPN connection drops every few minutes</button>
+                        <button class="btn btn-secondary btn-sm text-left w-full" onclick="setInput('Received a suspicious phishing email')">Received a suspicious phishing email</button>
+                        <button class="btn btn-secondary btn-sm text-left w-full" onclick="setInput('Printer shows offline status')">Printer shows offline status</button>
+                        <button class="btn btn-secondary btn-sm text-left w-full" onclick="setInput('Blue screen error on startup')">Blue screen error on startup</button>
+                        <button class="btn btn-secondary btn-sm text-left w-full" onclick="setInput('Can\'t install software - permission denied')">Can't install software - permission denied</button>
+                        <button class="btn btn-secondary btn-sm text-left w-full" onclick="setInput('Hard drive is full, need space')">Hard drive is full, need space</button>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="chat-input-area">
+        <form id="chat-form" class="chat-input-wrapper">
+            <input type="text" id="chat-input" class="chat-input" placeholder="Type your issue here..." autocomplete="off">
+            <button type="submit" class="chat-send-btn" id="send-btn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const sessionId = "{{ session_id|default:'' }}";
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    const clearChatBtn = document.getElementById('clear-chat-btn');
+
+    function setInput(text) {
+        chatInput.value = text;
+        chatInput.focus();
+    }
+
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    // Call on load
+    scrollToBottom();
+
+    function formatResponse(text) {
+        let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        formatted = formatted.replace(/\n/g, '<br>');
+        formatted = formatted.replace(/---/g, '<hr>');
+        return formatted;
+    }
+
+    function appendMessage(role, content, confidence = null, sources = null) {
+        const div = document.createElement('div');
+        div.className = 'message ' + (role === 'user' ? 'message-user' : 'message-assistant');
+        
+        let avatarIcon = role === 'user' ? 'fa-user' : 'fa-robot';
+        
+        let html = `
+            <div class="message-avatar"><i class="fas ${avatarIcon}"></i></div>
+            <div class="message-content">
+                ${content}
+        `;
+        
+        if (confidence !== null) {
+            let confValue = confidence;
+            if (confValue <= 1) {
+                confValue = (confValue * 100).toFixed(0);
+            }
+            html += `<div class="message-confidence"><i class="fas fa-check-circle"></i> Confidence: ${confValue}%</div>`;
+        }
+        
+        if (sources && sources.length > 0) {
+            html += `<div class="mt-2 text-xs text-muted"><strong>Sources:</strong><ul>`;
+            sources.forEach(src => {
+                html += `<li>${src}</li>`;
+            });
+            html += `</ul></div>`;
+        }
+        
+        html += `</div>`;
+        div.innerHTML = html;
+        chatMessages.appendChild(div);
+        scrollToBottom();
+    }
+
+    function addTypingIndicator() {
+        const div = document.createElement('div');
+        div.className = 'message message-assistant typing-indicator-msg';
+        div.id = 'typing-indicator';
+        div.innerHTML = `
+            <div class="message-avatar"><i class="fas fa-robot"></i></div>
+            <div class="message-content typing-indicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        `;
+        chatMessages.appendChild(div);
+        scrollToBottom();
+    }
+
+    function removeTypingIndicator() {
+        const indicator = document.getElementById('typing-indicator');
+        if (indicator) {
+            indicator.remove();
+        }
+    }
+
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const message = chatInput.value.trim();
+        if (!message) return;
+        
+        // Remove welcome message if exists
+        const welcomeMessage = document.getElementById('welcome-message');
+        if (welcomeMessage) welcomeMessage.remove();
+
+        appendMessage('user', message);
+        chatInput.value = '';
+        
+        sendBtn.disabled = true;
+        chatInput.disabled = true;
+        addTypingIndicator();
+
+        try {
+            const response = await fetch('/api/chat/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    message: message,
+                    session_id: sessionId
+                })
+            });
+            
+            const data = await response.json();
+            removeTypingIndicator();
+            
+            const responseText = data.message || data.response;
+            if (responseText) {
+                appendMessage('assistant', formatResponse(responseText), data.confidence, data.sources);
+            } else if (data.error) {
+                appendMessage('assistant', 'Error: ' + data.error);
+            } else {
+                appendMessage('assistant', 'Sorry, I encountered an unknown error.');
+            }
+        } catch (error) {
+            removeTypingIndicator();
+            appendMessage('assistant', 'Sorry, there was a connection error.');
+        } finally {
+            sendBtn.disabled = false;
+            chatInput.disabled = false;
+            chatInput.focus();
+        }
+    });
+
+    clearChatBtn.addEventListener('click', async () => {
+        try {
+            await fetch('/api/chat/clear/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ session_id: sessionId })
+            });
+            chatMessages.innerHTML = '';
+        } catch (error) {
+            console.error('Error clearing chat:', error);
+        }
+    });
+
+    // Helper to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

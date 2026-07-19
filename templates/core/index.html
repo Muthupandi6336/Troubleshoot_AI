@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Troubleshoot AI — Intelligent IT Problem Solver{% endblock %}
+
+{% block main_class %}no-sidebar{% endblock %}
+{% block sidebar %}{% endblock %}
+
+{% block content %}
+<!-- Top Header Navigation for Landing Page -->
+<header class="landing-nav">
+  <div class="logo">
+    <span class="logo-icon">🧠</span>
+    <h1 class="logo-text">Troubleshoot<span class="text-gradient">AI</span></h1>
+  </div>
+  <nav class="landing-nav-links">
+    <a href="{% url 'index' %}" class="landing-nav-link active">Home</a>
+    <a href="{% url 'dashboard' %}" class="landing-nav-link">Dashboard</a>
+    <a href="{% url 'chatbot' %}" class="landing-nav-link">AI Assistant</a>
+    <a href="{% url 'tickets' %}" class="landing-nav-link">Tickets</a>
+    <a href="{% url 'log_analyzer' %}" class="landing-nav-link">Log Analyzer</a>
+    <a href="{% url 'knowledge_base' %}" class="landing-nav-link">Knowledge Base</a>
+  </nav>
+  <div>
+    <a href="{% url 'dashboard' %}" class="btn btn-primary btn-sm rounded-full px-4">
+      Launch Console &rarr;
+    </a>
+  </div>
+</header>
+
+<div style="width: 100%; max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 4rem;">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-bg"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    
+    <h1 class="hero-title text-gradient animate-fadeInUp">
+      Autonomous AI Troubleshooting & Incident Resolution
+    </h1>
+    <p class="hero-subtitle animate-fadeInUp delay-1">
+      Empower Associate Support Engineers with RAG-driven issue diagnosis, instant log anomaly detection, and automated ticket classification.
+    </p>
+
+    <div class="hero-cta animate-fadeInUp delay-2">
+      <a href="{% url 'chatbot' %}" class="btn btn-primary btn-lg rounded-full px-8 shadow-lg">
+        🤖 Start AI Assistant
+      </a>
+      <a href="{% url 'tickets' %}" class="btn btn-secondary btn-lg rounded-full px-8">
+        🎫 Submit Ticket
+      </a>
+    </div>
+  </section>
+
+  <!-- Live System Operational Metrics (Real Live Data Starting at ZERO) -->
+  <section style="margin-top: 3rem; margin-bottom: 3.5rem;">
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+      <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em;">
+        Live System Metrics
+      </h2>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
+        Real-time tracking of operational tickets, resolution rate, and log analysis activity.
+      </p>
+    </div>
+
+    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem;">
+      <div class="card stat-card" style="padding: 1.25rem;">
+        <div class="stat-icon-wrapper stat-icon-primary">🎫</div>
+        <div class="stat-content">
+          <div class="stat-value" id="live-total-tickets">{{ total_tickets }}</div>
+          <div class="stat-label">Total Tickets</div>
+        </div>
+      </div>
+      <div class="card stat-card" style="padding: 1.25rem;">
+        <div class="stat-icon-wrapper stat-icon-success">✅</div>
+        <div class="stat-content">
+          <div class="stat-value" id="live-resolved-tickets">{{ resolved_tickets }}</div>
+          <div class="stat-label">Resolved</div>
+        </div>
+      </div>
+      <div class="card stat-card" style="padding: 1.25rem;">
+        <div class="stat-icon-wrapper" style="background: rgba(59, 130, 246, 0.1); color: var(--info); border: 1px solid rgba(59, 130, 246, 0.2);">📈</div>
+        <div class="stat-content">
+          <div class="stat-value" id="live-resolution-rate">{{ resolution_rate }}%</div>
+          <div class="stat-label">Resolution Rate</div>
+        </div>
+      </div>
+      <div class="card stat-card" style="padding: 1.25rem;">
+        <div class="stat-icon-wrapper stat-icon-warning">📋</div>
+        <div class="stat-content">
+          <div class="stat-value" id="live-total-logs">{{ total_logs }}</div>
+          <div class="stat-label">Logs Analyzed</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Problem Solving Capabilities -->
+  <section style="margin-top: 2rem;">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <h2 style="font-size: 2rem; font-weight: 800;" class="text-gradient">Core Capabilities</h2>
+      <p style="color: var(--text-secondary); max-width: 600px; margin: 0.5rem auto 0;">
+        Built specifically for modern IT Service Management & Engineering Teams.
+      </p>
+    </div>
+
+    <div class="feature-grid">
+      <div class="card feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3 class="feature-title">RAG AI Troubleshooter</h3>
+        <p class="card-body">Retrieval-Augmented Generation that searches internal IT playbooks for instant, step-by-step diagnostic solutions.</p>
+      </div>
+      <div class="card feature-card">
+        <div class="feature-icon">🎫</div>
+        <h3 class="feature-title">Smart Ticket Routing</h3>
+        <p class="card-body">Auto-categorization into Network, Hardware, Software, Security, or Access with sentiment detection and priority tagging.</p>
+      </div>
+      <div class="card feature-card">
+        <div class="feature-icon">📋</div>
+        <h3 class="feature-title">Log Anomaly Engine</h3>
+        <p class="card-body">Automated regex parsing of server, database, and application logs to detect critical errors and repeated anomalies.</p>
+      </div>
+      <div class="card feature-card">
+        <div class="feature-icon">📚</div>
+        <h3 class="feature-title">Knowledge Repository</h3>
+        <p class="card-body">Centralized, searchable solution guides for Tier-1 support engineers and self-service recovery.</p>
+      </div>
+      <div class="card feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3 class="feature-title">Security & Phishing Radar</h3>
+        <p class="card-body">Instant identification of suspicious email indicators, unauthorized access attempts, and threat remediation steps.</p>
+      </div>
+      <div class="card feature-card">
+        <div class="feature-icon">📊</div>
+        <h3 class="feature-title">Operational Analytics</h3>
+        <p class="card-body">Real-time charts tracking resolution speed, ticket category distribution, and incident volume trends.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer class="landing-footer">
+  <p>&copy; 2026 Troubleshoot AI — Autonomous IT Support & Incident Resolution System</p>
+</footer>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+      mainContent.classList.add('no-sidebar');
+    }
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) {
+      sidebar.style.display = 'none';
+    }
+  });
+</script>
+{% endblock %}

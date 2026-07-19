@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Troubleshoot AI - Intelligent IT Support Assistant powered by AI for automated troubleshooting, ticket management, and log analysis.">
+    <title>{% block title %}Troubleshoot AI{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% block sidebar %}
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="logo-icon">🧠</span>
+                <h1 class="logo-text">Troubleshoot<span class="text-gradient">AI</span></h1>
+            </div>
+        </div>
+        <div class="sidebar-nav">
+            <a href="{% url 'index' %}" class="nav-item {% block nav_home %}{% endblock %}">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">Home</span>
+            </a>
+            <a href="{% url 'dashboard' %}" class="nav-item {% block nav_dashboard %}{% endblock %}">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">Dashboard</span>
+            </a>
+            <a href="{% url 'chatbot' %}" class="nav-item {% block nav_chatbot %}{% endblock %}">
+                <span class="nav-icon">🤖</span>
+                <span class="nav-text">AI Assistant</span>
+            </a>
+            <a href="{% url 'tickets' %}" class="nav-item {% block nav_tickets %}{% endblock %}">
+                <span class="nav-icon">🎫</span>
+                <span class="nav-text">Tickets</span>
+            </a>
+            <a href="{% url 'log_analyzer' %}" class="nav-item {% block nav_logs %}{% endblock %}">
+                <span class="nav-icon">📋</span>
+                <span class="nav-text">Log Analyzer</span>
+            </a>
+            <a href="{% url 'knowledge_base' %}" class="nav-item {% block nav_kb %}{% endblock %}">
+                <span class="nav-icon">📚</span>
+                <span class="nav-text">Knowledge Base</span>
+            </a>
+        </div>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">AI</div>
+                <div class="user-details">
+                    <span class="user-name">Support Agent</span>
+                    <span class="user-role">AI-Powered</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endblock %}
+    
+    <main class="main-content {% block main_class %}{% endblock %}" id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Mobile menu toggle -->
+    <button class="mobile-menu-toggle" id="menuToggle" onclick="document.getElementById('sidebar').classList.toggle('active')">
+        ☰
+    </button>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

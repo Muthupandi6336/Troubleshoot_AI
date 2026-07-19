@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Log Analyzer - Troubleshoot AI{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+  <div>
+    <h1 class="font-bold text-gradient" style="font-size: 2rem;">Log Analyzer</h1>
+    <p class="text-secondary mt-1">Paste your server, application, or system logs for instant AI-powered analysis</p>
+  </div>
+</div>
+
+<div class="card mb-6">
+  <div class="card-header">
+    <h2 class="card-title">Input Logs</h2>
+  </div>
+  <form id="log-form">
+    {% csrf_token %}
+    <div class="form-group">
+      <input type="text" id="log-title" class="form-control" placeholder="Log source/title (optional)">
+    </div>
+    <div class="form-group">
+      <textarea id="log-content" class="form-control" style="font-family: var(--font-mono); min-height: 250px;" required placeholder="Paste your log contents here..."></textarea>
+    </div>
+    <div class="flex gap-4">
+      <button type="submit" class="btn btn-primary glow" id="analyze-btn">
+        <span>🔍</span> Analyze Logs
+      </button>
+      <button type="button" class="btn btn-secondary" id="load-sample-btn">
+        <span>📋</span> Load Sample Logs
+      </button>
+    </div>
+  </form>
+</div>
+
+<div id="results-section" style="display: none;" class="animate-fadeInUp">
+  <div class="mb-4">
+    <h2 class="font-bold text-primary" style="font-size: 1.5rem;">Analysis Results</h2>
+  </div>
+  
+  <div class="log-summary">
+    <div class="log-summary-item" style="border-top: 3px solid var(--glass-border);">
+      <div class="log-summary-count" id="sum-lines">0</div>
+      <div class="log-summary-label">Total Lines</div>
+    </div>
+    <div class="log-summary-item errors">
+      <div class="log-summary-count text-danger" id="sum-errors">0</div>
+      <div class="log-summary-label">Errors</div>
+    </div>
+    <div class="log-summary-item warnings">
+      <div class="log-summary-count" style="color: var(--warning);" id="sum-warnings">0</div>
+      <div class="log-summary-label">Warnings</div>
+    </div>
+    <div class="log-summary-item info">
+      <div class="log-summary-count" style="color: var(--info);" id="sum-info">0</div>
+      <div class="log-summary-label">Info</div>
+    </div>
+    <div class="log-summary-item" style="border-top: 3px solid var(--accent-primary);">
+      <div class="log-summary-count text-gradient" id="sum-score">0%</div>
+      <div class="log-summary-label">Health Score</div>
+    </div>
+  </div>
+
+  <div class="card mb-6" id="anomalies-container" style="display: none;">
+    <div class="card-header" style="border-bottom: none; padding-bottom: 0;">
+      <h2 class="card-title text-danger">Detected Anomalies & Recommendations</h2>
+    </div>
+    <div class="card-body" id="anomalies-list" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+
+  <div class="card mb-6 p-0" style="padding: 0;">
+    <div class="log-viewer">
+      <div class="log-toolbar">
+        <span class="text-secondary font-medium text-sm">Log Viewer</span>
+      </div>
+      <div class="log-content" id="log-viewer-content">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  const SAMPLE_LOGS = `2024-01-15 08:00:01 [INFO] Application server started on port 8080
+2024-01-15 08:00:02 [INFO] Database connection pool initialized (max: 20)
+2024-01-15 08:01:15 [WARNING] High memory usage detected: 85% (threshold: 80%)
+2024-01-15 08:02:30 [ERROR] Failed to connect to authentication service: Connection refused
+2024-01-15 08:02:31 [ERROR] Connection timeout after 30s - auth.internal.company.com:443
+2024-01-15 08:03:00 [INFO] Retry attempt 1/3 for authentication service
+2024-01-15 08:03:05 [ERROR] Failed to connect to authentication service: Connection refused  
+2024-01-15 08:03:10 [WARNING] Falling back to cached credentials - stale data possible
+2024-01-15 08:04:00 [INFO] User login successful: admin@company.com (IP: 10.0.1.45)
+2024-01-15 08:05:22 [ERROR] Disk space critical: /var/log partition at 95% capacity
+2024-01-15 08:06:00 [WARNING] Deprecated API endpoint called: /api/v1/users (use /api/v2/users)
+2024-01-15 08:07:15 [INFO] Scheduled backup job started - target: /backup/daily/2024-01-15
+2024-01-15 08:08:30 [ERROR] Backup failed: Permission denied writing to /backup/daily/
+2024-01-15 08:09:00 [INFO] Alert notification sent to ops-team@company.com
+2024-01-15 08:10:45 [WARNING] SSL certificate for api.company.com expires in 7 days
+2024-01-15 08:12:00 [ERROR] HTTP 503 Service Unavailable: upstream server api-gateway timeout
+2024-01-15 08:13:00 [INFO] Health check passed: API response time 245ms (threshold: 500ms)
+2024-01-15 08:14:30 [ERROR] Unauthorized access attempt from IP 192.168.1.105 - blocked by firewall
+2024-01-15 08:15:00 [INFO] Firewall rule auto-updated: blocked IP 192.168.1.105
+2024-01-15 08:16:22 [WARNING] Memory usage still elevated: 88% - considering garbage collection
+2024-01-15 08:17:00 [INFO] Garbage collection completed - freed 340MB
+2024-01-15 08:18:15 [ERROR] Database query timeout: SELECT * FROM audit_logs WHERE... (exceeded 30s)
+2024-01-15 08:19:00 [WARNING] Slow query logged to /var/log/slow-queries.log
+2024-01-15 08:20:00 [INFO] System metrics report: CPU 45%, Memory 72%, Disk I/O 23%`;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const loadSampleBtn = document.getElementById('load-sample-btn');
+    const logContent = document.getElementById('log-content');
+    const logTitle = document.getElementById('log-title');
+    const form = document.getElementById('log-form');
+    const analyzeBtn = document.getElementById('analyze-btn');
+    const resultsSection = document.getElementById('results-section');
+
+    loadSampleBtn.addEventListener('click', () => {
+      logContent.value = SAMPLE_LOGS;
+      logTitle.value = "Production App Server Logs";
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const content = logContent.value.trim();
+      if (!content) return;
+
+      analyzeBtn.disabled = true;
+      analyzeBtn.innerHTML = '<span>⏳</span> Analyzing...';
+
+      try {
+        const res = await fetch('/api/logs/analyze/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+          },
+          body: JSON.stringify({ log_content: content, title: logTitle.value })
+        });
+        
+        const data = await res.json();
+        
+        // Setup stats
+        let errors = 0, warnings = 0, info = 0, linesCount = 0;
+        const lines = content.split('\n');
+        linesCount = lines.length;
+
+        const viewerContainer = document.getElementById('log-viewer-content');
+        viewerContainer.innerHTML = '';
+
+        lines.forEach((line, i) => {
+          let lineClass = '';
+          const upperLine = line.toUpperCase();
+          if (upperLine.includes('[ERROR]') || upperLine.includes(' ERROR ') || upperLine.includes('CRITICAL')) {
+            lineClass = 'error';
+            errors++;
+          } else if (upperLine.includes('[WARN') || upperLine.includes(' WARN')) {
+            lineClass = 'warning';
+            warnings++;
+          } else if (upperLine.includes('[INFO]') || upperLine.includes(' INFO ')) {
+            lineClass = 'info';
+            info++;
+          }
+
+          const lineDiv = document.createElement('div');
+          lineDiv.className = \`log-line \${lineClass}\`;
+          lineDiv.innerHTML = \`<div class="log-number">\${i + 1}</div><div class="log-text">\${escapeHTML(line)}</div>\`;
+          viewerContainer.appendChild(lineDiv);
+        });
+
+        document.getElementById('sum-lines').innerText = linesCount;
+        document.getElementById('sum-errors').innerText = errors;
+        document.getElementById('sum-warnings').innerText = warnings;
+        document.getElementById('sum-info').innerText = info;
+        
+        const score = Math.max(0, 100 - (errors * 10) - (warnings * 2));
+        document.getElementById('sum-score').innerText = score + '%';
+
+        // Setup anomalies
+        const anomaliesContainer = document.getElementById('anomalies-container');
+        const anomaliesList = document.getElementById('anomalies-list');
+        anomaliesList.innerHTML = '';
+        
+        if (data.anomalies && data.anomalies.length > 0) {
+          anomaliesContainer.style.display = 'block';
+          data.anomalies.forEach(anomaly => {
+            const card = document.createElement('div');
+            card.style.background = 'rgba(255,255,255,0.03)';
+            card.style.border = '1px solid var(--glass-border)';
+            card.style.borderRadius = 'var(--radius-sm)';
+            card.style.padding = '1rem';
+            
+            const severityColor = anomaly.severity.toLowerCase() === 'critical' ? 'var(--danger)' : 
+                                  anomaly.severity.toLowerCase() === 'high' ? 'var(--warning)' : 
+                                  'var(--info)';
+
+            card.innerHTML = \`
+              <div class="flex items-center gap-2 mb-2">
+                <span class="badge" style="background: \${severityColor}33; color: \${severityColor}; border: 1px solid \${severityColor};">\${anomaly.severity}</span>
+                <span class="font-bold">\${escapeHTML(anomaly.description)}</span>
+              </div>
+              <div class="text-secondary text-sm">\${escapeHTML(anomaly.recommendation).replace(/\\n/g, '<br>')}</div>
+            \`;
+            anomaliesList.appendChild(card);
+          });
+        } else {
+          anomaliesContainer.style.display = 'none';
+        }
+
+        resultsSection.style.display = 'block';
+      } catch (err) {
+        console.error(err);
+        alert('Analysis failed');
+      } finally {
+        analyzeBtn.disabled = false;
+        analyzeBtn.innerHTML = '<span>🔍</span> Analyze Logs';
+      }
+    });
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, tag => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          "'": '&#39;',
+          '"': '&quot;'
+        }[tag]));
+    }
+  });
+</script>
+{% endblock %}

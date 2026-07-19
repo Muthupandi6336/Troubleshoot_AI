@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Support Tickets - Troubleshoot AI{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+  <div>
+    <h1 class="font-bold text-gradient" style="font-size: 2rem;">Support Tickets</h1>
+    <p class="text-secondary mt-1">Manage and resolve user issues</p>
+  </div>
+  <button id="new-ticket-btn" class="btn btn-primary">
+    <span>+</span> New Ticket
+  </button>
+</div>
+
+<div class="card mb-6" style="padding: 1rem 1.5rem;">
+  <div class="flex gap-4 items-center">
+    <div style="flex: 1;">
+      <select id="filter-category" class="form-control" style="padding: 0.5rem 1rem; background-position: right 0.5rem center;">
+        <option value="">All Categories</option>
+        <option value="network">Network</option>
+        <option value="hardware">Hardware</option>
+        <option value="software">Software</option>
+        <option value="access">Access</option>
+      </select>
+    </div>
+    <div style="flex: 1;">
+      <select id="filter-priority" class="form-control" style="padding: 0.5rem 1rem; background-position: right 0.5rem center;">
+        <option value="">All Priorities</option>
+        <option value="critical">Critical</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+    </div>
+    <div style="flex: 1;">
+      <select id="filter-status" class="form-control" style="padding: 0.5rem 1rem; background-position: right 0.5rem center;">
+        <option value="">All Statuses</option>
+        <option value="open">Open</option>
+        <option value="in_progress">In Progress</option>
+        <option value="resolved">Resolved</option>
+        <option value="closed">Closed</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="flex flex-col gap-4" id="tickets-container">
+  {% for ticket in tickets %}
+  <div class="card ticket-item" data-category="{{ ticket.category|lower }}" data-priority="{{ ticket.priority|lower }}" data-status="{{ ticket.status|lower }}">
+    <div class="flex justify-between items-center mb-2">
+      <h3 class="card-title font-bold" style="font-size: 1.25rem;">{{ ticket.title }}</h3>
+      <div class="flex items-center gap-2">
+        <span class="badge" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">{{ ticket.category }}</span>
+        <span class="badge badge-priority-{{ ticket.priority|lower }}">{{ ticket.priority }}</span>
+        <span class="badge badge-{{ ticket.status|lower|cut:' ' }}">{{ ticket.status }}</span>
+        {% if ticket.sentiment == 'positive' %}
+          <span class="sentiment sentiment-positive" title="Positive">😊</span>
+        {% elif ticket.sentiment == 'negative' %}
+          <span class="sentiment sentiment-negative" title="Negative">😠</span>
+        {% else %}
+          <span class="sentiment sentiment-neutral" title="Neutral">😐</span>
+        {% endif %}
+      </div>
+    </div>
+    
+    <div class="card-body mb-4" style="font-size: 0.95rem; line-height: 1.6;">
+      <p>{{ ticket.description|linebreaksbr }}</p>
+    </div>
+    
+    {% if ticket.ai_suggestion %}
+    <div class="ai-suggestion glow" style="border-radius: var(--radius-md); border-left: 4px solid var(--accent-primary);">
+      <div class="ai-suggestion-title">
+        <span>✨</span> AI Suggestion
+      </div>
+      <div class="text-secondary" style="font-size: 0.9rem;">
+        {{ ticket.ai_suggestion|linebreaksbr }}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="flex justify-between items-center mt-4 pt-4" style="border-top: 1px solid var(--glass-border);">
+      <div class="text-muted text-sm">Created: {{ ticket.created_at|date:"M d, Y H:i" }}</div>
+      <div class="flex gap-2 items-center">
+        <select class="form-control status-update" data-id="{{ ticket.id }}" style="padding: 0.25rem 0.5rem; width: auto; font-size: 0.85rem; background-position: right 0.25rem center; padding-right: 1.5rem;">
+          <option value="open" {% if ticket.status == 'open' %}selected{% endif %}>Open</option>
+          <option value="in_progress" {% if ticket.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+          <option value="resolved" {% if ticket.status == 'resolved' %}selected{% endif %}>Resolved</option>
+          <option value="closed" {% if ticket.status == 'closed' %}selected{% endif %}>Closed</option>
+        </select>
+        <button class="btn btn-secondary btn-sm assign-btn" data-id="{{ ticket.id }}">Assign To Me</button>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="card text-center text-muted" style="padding: 3rem;">
+    <div style="font-size: 3rem; margin-bottom: 1rem;">🎫</div>
+    <p>No tickets found matching your criteria.</p>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- New Ticket Modal -->
+<div id="new-ticket-modal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2 class="modal-title">Submit New Ticket</h2>
+      <button class="modal-close" id="close-modal-btn">&times;</button>
+    </div>
+    <form id="new-ticket-form">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label" for="title">Title</label>
+        <input type="text" id="title" name="title" class="form-control" required placeholder="Brief summary of the issue">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="description">Description</label>
+        <textarea id="description" name="description" class="form-control" required placeholder="Please describe your problem in detail. Include any error messages or steps to reproduce."></textarea>
+      </div>
+      
+      <div id="ai-classification-result" class="ai-suggestion animate-fadeInUp" style="display: none;">
+        <div class="ai-suggestion-title"><span>🤖</span> AI Classification</div>
+        <div class="flex gap-2 mb-2" id="ai-badges"></div>
+        <div class="text-secondary" id="ai-suggestion-text" style="font-size: 0.85rem;"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancel-modal-btn">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="submit-ticket-btn">Submit Ticket</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Filtering logic
+    const filterCat = document.getElementById('filter-category');
+    const filterPri = document.getElementById('filter-priority');
+    const filterStat = document.getElementById('filter-status');
+    const tickets = document.querySelectorAll('.ticket-item');
+
+    function applyFilters() {
+      const cat = filterCat.value.toLowerCase();
+      const pri = filterPri.value.toLowerCase();
+      const stat = filterStat.value.toLowerCase();
+
+      tickets.forEach(ticket => {
+        const tCat = ticket.dataset.category;
+        const tPri = ticket.dataset.priority;
+        const tStat = ticket.dataset.status;
+
+        const matchCat = !cat || tCat === cat;
+        const matchPri = !pri || tPri === pri;
+        const matchStat = !stat || tStat === stat;
+
+        if (matchCat && matchPri && matchStat) {
+          ticket.style.display = 'block';
+        } else {
+          ticket.style.display = 'none';
+        }
+      });
+    }
+
+    filterCat.addEventListener('change', applyFilters);
+    filterPri.addEventListener('change', applyFilters);
+    filterStat.addEventListener('change', applyFilters);
+
+    // Update Status
+    document.querySelectorAll('.status-update').forEach(select => {
+      select.addEventListener('change', async (e) => {
+        const id = e.target.dataset.id;
+        const status = e.target.value;
+        try {
+          const res = await fetch(`/api/tickets/${id}/update/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({ status })
+          });
+          if (res.ok) {
+            // Update badge in UI
+            const ticketCard = e.target.closest('.ticket-item');
+            ticketCard.dataset.status = status;
+            applyFilters();
+          }
+        } catch(err) {
+          console.error(err);
+          alert('Failed to update status');
+        }
+      });
+    });
+
+    // Modal
+    const modal = document.getElementById('new-ticket-modal');
+    const newBtn = document.getElementById('new-ticket-btn');
+    const closeBtn = document.getElementById('close-modal-btn');
+    const cancelBtn = document.getElementById('cancel-modal-btn');
+    
+    function openModal() { modal.classList.add('active'); }
+    function closeModal() { 
+      modal.classList.remove('active'); 
+      document.getElementById('new-ticket-form').reset();
+      document.getElementById('ai-classification-result').style.display = 'none';
+    }
+
+    newBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+
+    // Form Submit
+    const form = document.getElementById('new-ticket-form');
+    const submitBtn = document.getElementById('submit-ticket-btn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('title').value;
+      const description = document.getElementById('description').value;
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Processing...';
+
+      try {
+        const res = await fetch('/api/tickets/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+          },
+          body: JSON.stringify({ title, description })
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+          // Show AI classification
+          const aiResult = document.getElementById('ai-classification-result');
+          const aiBadges = document.getElementById('ai-badges');
+          const aiText = document.getElementById('ai-suggestion-text');
+          
+          aiBadges.innerHTML = `
+            <span class="badge" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">${data.category || 'Unknown'}</span>
+            <span class="badge badge-priority-${(data.priority || 'low').toLowerCase()}">${data.priority || 'Low'}</span>
+          `;
+          let suggestion = data.ai_suggestion || 'Issue registered successfully.';
+          aiText.innerHTML = suggestion.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+          
+          aiResult.style.display = 'block';
+          submitBtn.innerText = 'Done - Reloading';
+          
+          setTimeout(() => {
+            window.location.reload();
+          }, 2500);
+        } else {
+          alert('Error: ' + JSON.stringify(data));
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Submit Ticket';
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Failed to submit ticket');
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Submit Ticket';
+      }
+    });
+  });
+</script>
+{% endblock %}
