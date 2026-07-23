@@ -1,12 +1,13 @@
 import json
 import uuid
+import csv
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 from django.db.models import Q
-from .models import Ticket, ChatMessage, KnowledgeArticle, LogAnalysis
+from .models import Ticket, ChatMessage, KnowledgeArticle, LogAnalysis, TicketActivity
 from .ai_engine import ai_engine
 
 # Page Views
@@ -144,6 +145,13 @@ def api_tickets(request):
         created_by=data.get('created_by', 'User'),
     )
     
+    TicketActivity.objects.create(
+        ticket=ticket,
+        action='created',
+        new_value=f'{ticket.category} / {ticket.priority}',
+        performed_by=data.get('created_by', 'User'),
+    )
+    
     return JsonResponse({
         'id': ticket.id,
         'title': ticket.title,
@@ -166,13 +174,35 @@ def api_ticket_update(request, ticket_id):
     
     data = json.loads(request.body)
     if 'status' in data:
+        old_status = ticket.status
         ticket.status = data['status']
         if data['status'] == 'resolved':
             ticket.resolved_at = timezone.now()
+        TicketActivity.objects.create(
+            ticket=ticket,
+            action='status_changed',
+            old_value=old_status,
+            new_value=data['status'],
+            performed_by='Agent',
+        )
     if 'priority' in data:
+        old_priority = ticket.priority
         ticket.priority = data['priority']
+        TicketActivity.objects.create(
+            ticket=ticket,
+            action='priority_changed',
+            old_value=old_priority,
+            new_value=data['priority'],
+            performed_by='Agent',
+        )
     if 'assigned_to' in data:
         ticket.assigned_to = data['assigned_to']
+        TicketActivity.objects.create(
+            ticket=ticket,
+            action='assigned',
+            new_value=data['assigned_to'],
+            performed_by='Agent',
+        )
     ticket.save()
     
     return JsonResponse({'success': True, 'id': ticket.id, 'status': ticket.status})
@@ -302,3 +332,26 @@ def api_chat_clear(request):
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
             
     return JsonResponse({'success': False, 'error': 'No session_id provided'}, status=400)
+
+def api_ticket_activities(request, ticket_id):
+    """Get activity timeline for a specific ticket."""
+    activities = TicketActivity.objects.filter(ticket_id=ticket_id).order_by('-created_at')[:20]
+    data = [{
+        'action': a.action,
+        'old_value': a.old_value,
+        'new_value': a.new_value,
+        'performed_by': a.performed_by,
+        'created_at': a.created_at.isoformat(),
+    } for a in activities]
+    return JsonResponse({'activities': data})
+
+def export_tickets_csv(request):
+    """Export all tickets as a CSV file."""
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="troubleshoot_ai_tickets.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['ID', 'Title', 'Description', 'Category', 'Priority', 'Status', 'Sentiment', 'AI Suggestion', 'Created By', 'Assigned To', 'Created At', 'Resolved At'])
+    tickets = Ticket.objects.all().order_by('-created_at')
+    for t in tickets:
+        writer.writerow([t.id, t.title, t.description, t.category, t.priority, t.status, t.sentiment, t.ai_suggestion or '', t.created_by, t.assigned_to or '', t.created_at.strftime('%Y-%m-%d %H:%M'), t.resolved_at.strftime('%Y-%m-%d %H:%M') if t.resolved_at else ''])
+    return response

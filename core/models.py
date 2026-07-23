@@ -85,3 +85,17 @@ class LogAnalysis(models.Model):
 
     def __str__(self):
         return self.title
+
+class TicketActivity(models.Model):
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name='activities')
+    action = CharField(max_length=100)  # e.g., 'created', 'status_changed', 'assigned'
+    old_value = CharField(max_length=100, blank=True, null=True)
+    new_value = CharField(max_length=100, blank=True, null=True)
+    performed_by = CharField(max_length=100, default='System')
+    created_at = DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.ticket.title} - {self.action}"

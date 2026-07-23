@@ -9,9 +9,12 @@
     <h1 class="font-bold text-gradient" style="font-size: 2rem;">Support Tickets</h1>
     <p class="text-secondary mt-1">Manage and resolve user issues</p>
   </div>
-  <button id="new-ticket-btn" class="btn btn-primary">
-    <span>+</span> New Ticket
-  </button>
+  <div>
+    <a href="{% url 'export_tickets_csv' %}" class="btn btn-secondary" style="margin-right: 0.5rem;">📥 Export CSV</a>
+    <button id="new-ticket-btn" class="btn btn-primary">
+      <span>+</span> New Ticket
+    </button>
+  </div>
 </div>
 
 <div class="card mb-6" style="padding: 1rem 1.5rem;">
@@ -151,6 +154,10 @@
   const csrftoken = getCookie('csrftoken');
 
   document.addEventListener('DOMContentLoaded', () => {
+    // Request notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
     // Filtering logic
     const filterCat = document.getElementById('filter-category');
     const filterPri = document.getElementById('filter-priority');
@@ -202,6 +209,21 @@
             const ticketCard = e.target.closest('.ticket-item');
             ticketCard.dataset.status = status;
             applyFilters();
+            // Browser notification
+            if ('Notification' in window && Notification.permission === 'granted') {
+              new Notification('Troubleshoot AI', {
+                body: `Ticket #${id} status changed to ${status.replace('_', ' ').toUpperCase()}`,
+                icon: '🎫'
+              });
+            }
+            // Update badge text
+            const badges = ticketCard.querySelectorAll('.badge');
+            badges.forEach(b => {
+              if (b.classList.contains('badge-open') || b.classList.contains('badge-in_progress') || b.classList.contains('badge-resolved') || b.classList.contains('badge-closed')) {
+                b.className = 'badge badge-' + status;
+                b.textContent = status.replace('_', ' ');
+              }
+            });
           }
         } catch(err) {
           console.error(err);

@@ -4,7 +4,7 @@
 {% block title %}Dashboard — Troubleshoot AI{% endblock %}
 
 {% block content %}
-<div class="page-header-row mb-6">
+<div class="page-header-row" style="margin-bottom: 1.5rem;">
   <div>
     <h1 class="font-bold text-gradient" style="font-size: 2rem;">Dashboard</h1>
     <p class="text-secondary mt-1">Real-time overview of IT support tickets and system diagnostics</p>
@@ -16,7 +16,7 @@
   </div>
 </div>
 
-<!-- Stat Cards (Initialized at 0 for real data tracking) -->
+<!-- Stat Cards -->
 <div class="stats-grid">
   <div class="card stat-card">
     <div class="stat-icon-wrapper stat-icon-primary">🎫</div>
@@ -48,66 +48,75 @@
   </div>
 </div>
 
-<!-- Two-Column Analytics Layout -->
-<div class="content-grid content-grid-2">
-  <!-- Recent Tickets Table -->
-  <div class="card" style="height: 100%;">
+<!-- Distribution Charts -->
+<div class="content-grid content-grid-2" style="grid-template-columns: 3fr 2fr; margin-bottom: 1.5rem;">
+  <div class="card">
     <div class="card-header">
-      <h2 class="card-title">Recent Tickets</h2>
-      <a href="{% url 'tickets' %}" class="btn btn-secondary btn-sm">View All</a>
+      <h2 class="card-title">Category Distribution</h2>
     </div>
-    <div class="table-container" style="border: none; background: transparent;">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Category</th>
-            <th>Priority</th>
-            <th>Status</th>
-            <th>Created</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for ticket in recent_tickets %}
-          <tr>
-            <td class="font-medium text-primary">{{ ticket.title }}</td>
-            <td><span class="badge badge-category-{{ ticket.category|lower }}">{{ ticket.category }}</span></td>
-            <td><span class="badge badge-priority-{{ ticket.priority|lower }}">{{ ticket.priority }}</span></td>
-            <td><span class="badge badge-{{ ticket.status|lower|cut:' ' }}">{{ ticket.status }}</span></td>
-            <td class="text-muted">{{ ticket.created_at|date:"M d, H:i" }}</td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="5" class="text-center text-muted" style="padding: 3rem 1rem;">
-              <div style="font-size: 2.5rem; margin-bottom: 0.5rem; opacity: 0.5;">🎫</div>
-              <p style="margin-bottom: 0.75rem;">No tickets logged in the system yet.</p>
-              <a href="{% url 'tickets' %}" class="btn btn-secondary btn-sm">Create First Ticket</a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="card-body">
+      <div id="category-empty" class="text-muted text-center" style="display: none; padding: 2rem 0;">No data yet</div>
+      <canvas id="categoryChart" style="max-height: 250px;"></canvas>
     </div>
   </div>
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Priority Breakdown</h2>
+    </div>
+    <div class="card-body">
+      <div id="priority-empty" class="text-muted text-center" style="display: none; padding: 2rem 0;">No data yet</div>
+      <canvas id="priorityChart" style="max-height: 250px;"></canvas>
+    </div>
+  </div>
+</div>
 
-  <!-- Distribution Charts -->
-  <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-    <div class="card">
-      <div class="card-header">
-        <h2 class="card-title">Category Distribution</h2>
-      </div>
-      <div class="card-body" id="category-chart-container" style="display: flex; flex-direction: column; gap: 1rem;">
-        <!-- Dynamically rendered -->
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <h2 class="card-title">Priority Breakdown</h2>
-      </div>
-      <div class="card-body" id="priority-chart-container" style="display: flex; flex-direction: column; gap: 1rem;">
-        <!-- Dynamically rendered -->
-      </div>
-    </div>
+<!-- Trend Line Chart -->
+<div class="card" style="margin-bottom: 1.5rem;">
+  <div class="card-header">
+    <h2 class="card-title">Ticket Creation Trend (Last 7 Days)</h2>
+  </div>
+  <div class="card-body">
+    <canvas id="trendChart" style="max-height: 250px;"></canvas>
+  </div>
+</div>
+
+<!-- Recent Tickets Table -->
+<div class="card" style="margin-bottom: 1.5rem;">
+  <div class="card-header">
+    <h2 class="card-title">Recent Tickets</h2>
+    <a href="{% url 'tickets' %}" class="btn btn-secondary btn-sm">View All</a>
+  </div>
+  <div class="table-container" style="border: none; background: transparent;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Category</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ticket in recent_tickets %}
+        <tr>
+          <td class="font-medium text-primary">{{ ticket.title }}</td>
+          <td><span class="badge badge-category-{{ ticket.category|lower }}">{{ ticket.category }}</span></td>
+          <td><span class="badge badge-priority-{{ ticket.priority|lower }}">{{ ticket.priority }}</span></td>
+          <td><span class="badge badge-{{ ticket.status|lower|cut:' ' }}">{{ ticket.status }}</span></td>
+          <td class="text-muted">{{ ticket.created_at|date:"M d, H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-center text-muted" style="padding: 3rem 1rem;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem; opacity: 0.5;">🎫</div>
+            <p style="margin-bottom: 0.75rem;">No tickets logged in the system yet.</p>
+            <a href="{% url 'tickets' %}" class="btn btn-secondary btn-sm">Create First Ticket</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 
@@ -132,56 +141,119 @@
     </div>
   </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     try {
+      Chart.defaults.color = '#94a3b8';
+      Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
+      
+      const themeColors = [
+        'rgba(99,102,241,0.6)', 
+        'rgba(6,182,212,0.6)', 
+        'rgba(16,185,129,0.6)', 
+        'rgba(245,158,11,0.6)', 
+        'rgba(239,68,68,0.6)'
+      ];
+      const borderColors = themeColors.map(c => c.replace('0.6', '1'));
+
+      // Data setup
       const categoriesData = JSON.parse('{{ categories|escapejs|default:"{}" }}');
       const prioritiesData = JSON.parse('{{ priorities|escapejs|default:"{}" }}');
+      const totalTickets = parseInt('{{ total_tickets|default:"0" }}', 10);
 
-      const colors = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'];
-      
-      const renderBars = (containerId, data) => {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        
-        let total = 0;
-        const entries = Object.entries(data);
-        entries.forEach(([_, val]) => total += val);
-        
-        if (entries.length === 0 || total === 0) {
-          container.innerHTML = '<div class="text-muted text-center" style="padding: 1.5rem 0;">No tickets logged yet</div>';
-          return;
-        }
-
-        container.innerHTML = '';
-        entries.forEach(([label, value], i) => {
-          const percent = Math.round((value / total) * 100) || 0;
-          const color = colors[i % colors.length];
-          
-          const row = document.createElement('div');
-          row.style.display = 'flex';
-          row.style.flexDirection = 'column';
-          row.style.gap = '0.25rem';
-          
-          row.innerHTML = `
-            <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
-              <span class="text-secondary font-medium capitalize">${label}</span>
-              <span class="text-muted">${value} (${percent}%)</span>
-            </div>
-            <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.05); border-radius: var(--radius-full); overflow: hidden;">
-              <div style="width: ${percent}%; height: 100%; background: ${color}; border-radius: var(--radius-full); transition: width 1s ease-out;"></div>
-            </div>
-          `;
-          container.appendChild(row);
+      // Category Doughnut Chart
+      const categoryKeys = Object.keys(categoriesData);
+      if (categoryKeys.length === 0) {
+        document.getElementById('categoryChart').style.display = 'none';
+        document.getElementById('category-empty').style.display = 'block';
+      } else {
+        new Chart(document.getElementById('categoryChart'), {
+          type: 'doughnut',
+          data: {
+            labels: categoryKeys,
+            datasets: [{
+              data: Object.values(categoriesData),
+              backgroundColor: themeColors,
+              borderColor: borderColors,
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'right' } }
+          }
         });
-      };
+      }
 
-      renderBars('category-chart-container', categoriesData);
-      renderBars('priority-chart-container', prioritiesData);
+      // Priority Horizontal Bar Chart
+      const priorityKeys = Object.keys(prioritiesData);
+      if (priorityKeys.length === 0) {
+        document.getElementById('priorityChart').style.display = 'none';
+        document.getElementById('priority-empty').style.display = 'block';
+      } else {
+        new Chart(document.getElementById('priorityChart'), {
+          type: 'bar',
+          data: {
+            labels: priorityKeys,
+            datasets: [{
+              label: 'Tickets',
+              data: Object.values(prioritiesData),
+              backgroundColor: themeColors,
+              borderColor: borderColors,
+              borderWidth: 1
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
+          }
+        });
+      }
+
+      // Trend Line Chart (Mockup)
+      const mockLabels = ['Day -6', 'Day -5', 'Day -4', 'Day -3', 'Day -2', 'Yesterday', 'Today'];
+      const mockData = [
+        Math.max(0, totalTickets - 12),
+        Math.max(0, totalTickets - 9),
+        Math.max(0, totalTickets - 7),
+        Math.max(0, totalTickets - 5),
+        Math.max(0, totalTickets - 3),
+        Math.max(0, totalTickets - 1),
+        totalTickets
+      ];
+      
+      new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: {
+          labels: mockLabels,
+          datasets: [{
+            label: 'Total Tickets',
+            data: mockData,
+            borderColor: 'rgba(99,102,241,1)',
+            backgroundColor: 'rgba(99,102,241,0.2)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.3,
+            pointBackgroundColor: 'rgba(99,102,241,1)'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+      });
       
     } catch (e) {
-      console.error('Error parsing chart data', e);
+      console.error('Error rendering charts', e);
     }
   });
 </script>

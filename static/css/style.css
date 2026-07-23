@@ -2019,3 +2019,104 @@ select.form-control {
   cursor: not-allowed;
   pointer-events: none;
 }
+
+/* ==========================================================================
+   19. Light Theme Override
+   ========================================================================== */
+[data-theme='light'] {
+  --bg-primary: #f0f2f5;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #e8eaed;
+  --text-primary: #1a1a2e;
+  --text-secondary: #4a5568;
+  --text-muted: #718096;
+  --glass: rgba(255, 255, 255, 0.85);
+  --glass-hover: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+}
+
+[data-theme='light'] body {
+  background: linear-gradient(135deg, #f0f2f5, #e8eaed);
+}
+
+[data-theme='light'] .sidebar {
+  background: rgba(255, 255, 255, 0.9);
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+[data-theme='light'] .card {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+[data-theme='light'] .table th {
+  background: rgba(0, 0, 0, 0.03);
+  color: #4a5568;
+}
+
+[data-theme='light'] .table td {
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+  color: #2d3748;
+}
+
+[data-theme='light'] .form-control {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #1a1a2e;
+}
+
+[data-theme='light'] .chat-container {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+[data-theme='light'] .chat-messages {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme='light'] .message-assistant .message-content {
+  background: rgba(99, 102, 241, 0.08);
+  color: #1a1a2e;
+}
+
+[data-theme='light'] .message-user .message-content {
+  color: white;
+}
+
+[data-theme='light'] .modal-overlay .modal-card {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+[data-theme='light'] .landing-nav {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme='light'] .hero-section {
+  color: #1a1a2e;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  margin-left: auto;
+  margin-right: 0.5rem;
+}
+
+.theme-toggle:hover {
+  background: var(--glass-hover);
+  transform: scale(1.1);
+}
