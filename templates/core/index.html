@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Troubleshoot AI — Intelligent IT Problem Solver{% endblock %}
+{% block title %}Troubleshoot AI — Autonomous IT Support & Incident Resolution{% endblock %}
 
 {% block main_class %}no-sidebar{% endblock %}
 {% block sidebar %}{% endblock %}
@@ -9,10 +9,11 @@
 {% block content %}
 <!-- Top Header Navigation for Landing Page -->
 <header class="landing-nav">
-  <div class="logo">
-    <span class="logo-icon">🧠</span>
-    <h1 class="logo-text">Troubleshoot<span class="text-gradient">AI</span></h1>
+  <div class="logo" style="display: flex; align-items: center; gap: 0.5rem;">
+    <span class="logo-icon" style="font-size: 1.75rem;">🧠</span>
+    <h1 class="logo-text" style="font-size: 1.35rem; font-weight: 800; margin: 0;">Troubleshoot<span class="text-gradient">AI</span></h1>
   </div>
+  
   <nav class="landing-nav-links">
     <a href="{% url 'index' %}" class="landing-nav-link active">Home</a>
     <a href="{% url 'dashboard' %}" class="landing-nav-link">Dashboard</a>
@@ -21,49 +22,58 @@
     <a href="{% url 'log_analyzer' %}" class="landing-nav-link">Log Analyzer</a>
     <a href="{% url 'knowledge_base' %}" class="landing-nav-link">Knowledge Base</a>
   </nav>
-  <div>
-    <a href="{% url 'dashboard' %}" class="btn btn-primary btn-sm rounded-full px-4">
+
+  <div style="display: flex; align-items: center; gap: 1rem;">
+    <button class="theme-toggle" id="themeToggleNav" title="Toggle Light/Dark Mode" onclick="toggleTheme()" style="margin: 0;">🌙</button>
+    <a href="{% url 'dashboard' %}" class="btn btn-primary btn-sm rounded-full" style="padding: 0.5rem 1.25rem; font-weight: 600;">
       Launch Console &rarr;
     </a>
   </div>
 </header>
 
-<div style="width: 100%; max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 4rem;">
+<!-- Main Wrapper -->
+<div style="width: 100%; max-width: 1200px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem;">
+  
   <!-- Hero Section -->
-  <section class="hero-section">
+  <section class="hero-section" style="padding: 2rem 1rem 3rem;">
     <div class="hero-bg"></div>
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
     
-    <h1 class="hero-title text-gradient animate-fadeInUp">
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.25); padding: 0.35rem 1rem; border-radius: 9999px; font-size: 0.85rem; color: var(--accent-primary); font-weight: 600; margin-bottom: 1.25rem;">
+      ✨ Production-Ready IT Problem Solver Engine
+    </div>
+
+    <h1 class="hero-title text-gradient animate-fadeInUp" style="font-size: clamp(2.2rem, 4vw, 3.6rem); max-width: 900px; margin-bottom: 1rem; line-height: 1.2;">
       Autonomous AI Troubleshooting & Incident Resolution
     </h1>
-    <p class="hero-subtitle animate-fadeInUp delay-1">
+
+    <p class="hero-subtitle animate-fadeInUp delay-1" style="font-size: clamp(1rem, 1.6vw, 1.15rem); color: var(--text-secondary); max-width: 680px; margin: 0 auto 2rem; line-height: 1.6;">
       Empower Associate Support Engineers with RAG-driven issue diagnosis, instant log anomaly detection, and automated ticket classification.
     </p>
 
-    <div class="hero-cta animate-fadeInUp delay-2">
-      <a href="{% url 'chatbot' %}" class="btn btn-primary btn-lg rounded-full px-8 shadow-lg">
+    <div class="hero-cta animate-fadeInUp delay-2" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+      <a href="{% url 'chatbot' %}" class="btn btn-primary btn-lg rounded-full px-8 shadow-lg" style="padding: 0.85rem 2.25rem; font-weight: 600;">
         🤖 Start AI Assistant
       </a>
-      <a href="{% url 'tickets' %}" class="btn btn-secondary btn-lg rounded-full px-8">
+      <a href="{% url 'tickets' %}" class="btn btn-secondary btn-lg rounded-full px-8" style="padding: 0.85rem 2.25rem; font-weight: 600;">
         🎫 Submit Ticket
       </a>
     </div>
   </section>
 
-  <!-- Live System Operational Metrics (Real Live Data Starting at ZERO) -->
-  <section style="margin-top: 3rem; margin-bottom: 3.5rem;">
+  <!-- Live System Operational Metrics -->
+  <section style="margin-top: 2.5rem; margin-bottom: 3.5rem;">
     <div style="text-align: center; margin-bottom: 1.5rem;">
-      <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em;">
+      <h2 style="font-size: 1.1rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em;">
         Live System Metrics
       </h2>
       <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
-        Real-time tracking of operational tickets, resolution rate, and log analysis activity.
+        Real-time operational metrics. Initialized at 0 for clean production use.
       </p>
     </div>
 
-    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem;">
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem;">
       <div class="card stat-card" style="padding: 1.25rem;">
         <div class="stat-icon-wrapper stat-icon-primary">🎫</div>
         <div class="stat-content">
@@ -95,7 +105,7 @@
     </div>
   </section>
 
-  <!-- Key Problem Solving Capabilities -->
+  <!-- Core Capabilities Section -->
   <section style="margin-top: 2rem;">
     <div style="text-align: center; margin-bottom: 2rem;">
       <h2 style="font-size: 2rem; font-weight: 800;" class="text-gradient">Core Capabilities</h2>
@@ -104,42 +114,42 @@
       </p>
     </div>
 
-    <div class="feature-grid">
-      <div class="card feature-card">
-        <div class="feature-icon">🤖</div>
-        <h3 class="feature-title">RAG AI Troubleshooter</h3>
-        <p class="card-body">Retrieval-Augmented Generation that searches internal IT playbooks for instant, step-by-step diagnostic solutions.</p>
+    <div class="feature-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+      <div class="card feature-card" style="padding: 1.75rem; border-radius: var(--radius-lg);">
+        <div class="feature-icon" style="font-size: 2.25rem; margin-bottom: 1rem;">🤖</div>
+        <h3 class="feature-title" style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">RAG AI Troubleshooter</h3>
+        <p class="card-body" style="color: var(--text-secondary); font-size: 0.925rem; line-height: 1.5;">Retrieval-Augmented Generation that searches internal IT playbooks for instant, step-by-step diagnostic solutions.</p>
       </div>
-      <div class="card feature-card">
-        <div class="feature-icon">🎫</div>
-        <h3 class="feature-title">Smart Ticket Routing</h3>
-        <p class="card-body">Auto-categorization into Network, Hardware, Software, Security, or Access with sentiment detection and priority tagging.</p>
+      <div class="card feature-card" style="padding: 1.75rem; border-radius: var(--radius-lg);">
+        <div class="feature-icon" style="font-size: 2.25rem; margin-bottom: 1rem;">🎫</div>
+        <h3 class="feature-title" style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">Smart Ticket Routing</h3>
+        <p class="card-body" style="color: var(--text-secondary); font-size: 0.925rem; line-height: 1.5;">Auto-categorization into Network, Hardware, Software, Security, or Access with sentiment detection and priority tagging.</p>
       </div>
-      <div class="card feature-card">
-        <div class="feature-icon">📋</div>
-        <h3 class="feature-title">Log Anomaly Engine</h3>
-        <p class="card-body">Automated regex parsing of server, database, and application logs to detect critical errors and repeated anomalies.</p>
+      <div class="card feature-card" style="padding: 1.75rem; border-radius: var(--radius-lg);">
+        <div class="feature-icon" style="font-size: 2.25rem; margin-bottom: 1rem;">📋</div>
+        <h3 class="feature-title" style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">Log Anomaly Engine</h3>
+        <p class="card-body" style="color: var(--text-secondary); font-size: 0.925rem; line-height: 1.5;">Automated regex parsing of server, database, and application logs to detect critical errors and repeated anomalies.</p>
       </div>
-      <div class="card feature-card">
-        <div class="feature-icon">📚</div>
-        <h3 class="feature-title">Knowledge Repository</h3>
-        <p class="card-body">Centralized, searchable solution guides for Tier-1 support engineers and self-service recovery.</p>
+      <div class="card feature-card" style="padding: 1.75rem; border-radius: var(--radius-lg);">
+        <div class="feature-icon" style="font-size: 2.25rem; margin-bottom: 1rem;">📚</div>
+        <h3 class="feature-title" style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">Knowledge Repository</h3>
+        <p class="card-body" style="color: var(--text-secondary); font-size: 0.925rem; line-height: 1.5;">Centralized, searchable solution guides for Tier-1 support engineers and self-service recovery.</p>
       </div>
-      <div class="card feature-card">
-        <div class="feature-icon">🔒</div>
-        <h3 class="feature-title">Security & Phishing Radar</h3>
-        <p class="card-body">Instant identification of suspicious email indicators, unauthorized access attempts, and threat remediation steps.</p>
+      <div class="card feature-card" style="padding: 1.75rem; border-radius: var(--radius-lg);">
+        <div class="feature-icon" style="font-size: 2.25rem; margin-bottom: 1rem;">🔒</div>
+        <h3 class="feature-title" style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">Security & Phishing Radar</h3>
+        <p class="card-body" style="color: var(--text-secondary); font-size: 0.925rem; line-height: 1.5;">Instant identification of suspicious email indicators, unauthorized access attempts, and threat remediation steps.</p>
       </div>
-      <div class="card feature-card">
-        <div class="feature-icon">📊</div>
-        <h3 class="feature-title">Operational Analytics</h3>
-        <p class="card-body">Real-time charts tracking resolution speed, ticket category distribution, and incident volume trends.</p>
+      <div class="card feature-card" style="padding: 1.75rem; border-radius: var(--radius-lg);">
+        <div class="feature-icon" style="font-size: 2.25rem; margin-bottom: 1rem;">📊</div>
+        <h3 class="feature-title" style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">Operational Analytics</h3>
+        <p class="card-body" style="color: var(--text-secondary); font-size: 0.925rem; line-height: 1.5;">Real-time charts tracking resolution speed, ticket category distribution, and incident volume trends.</p>
       </div>
     </div>
   </section>
 </div>
 
-<footer class="landing-footer">
+<footer class="landing-footer" style="text-align: center; padding: 2rem; border-top: 1px solid var(--glass-border); color: var(--text-muted); font-size: 0.875rem;">
   <p>&copy; 2026 Troubleshoot AI — Autonomous IT Support & Incident Resolution System</p>
 </footer>
 {% endblock %}
