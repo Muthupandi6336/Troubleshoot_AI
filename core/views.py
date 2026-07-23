@@ -355,3 +355,14 @@ def export_tickets_csv(request):
     for t in tickets:
         writer.writerow([t.id, t.title, t.description, t.category, t.priority, t.status, t.sentiment, t.ai_suggestion or '', t.created_by, t.assigned_to or '', t.created_at.strftime('%Y-%m-%d %H:%M'), t.resolved_at.strftime('%Y-%m-%d %H:%M') if t.resolved_at else ''])
     return response
+
+def service_worker(request):
+    """Serve service worker for PWA support."""
+    import os
+    from django.conf import settings
+    sw_path = os.path.join(settings.BASE_DIR, 'static', 'sw.js')
+    if os.path.exists(sw_path):
+        with open(sw_path, 'r') as f:
+            return HttpResponse(f.read(), content_type='application/javascript')
+    return HttpResponse("// Service worker not found", content_type='application/javascript')
+

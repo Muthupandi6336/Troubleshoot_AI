@@ -19,4 +19,6 @@ urlpatterns = [
     path('api/knowledge/', views.api_knowledge, name='api_knowledge'),
     path('api/stats/', views.api_stats, name='api_stats'),
     path('api/tickets/export/csv/', views.export_tickets_csv, name='export_tickets_csv'),
+    path('sw.js', views.service_worker, name='service_worker'),
 ]
+
